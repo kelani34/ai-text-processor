@@ -52,6 +52,7 @@ export interface Message {
   role: 'user' | 'assistant' | (string & {});
   content: string;
   createdAt?: Date;
+  type: 'summary' | 'translate' | 'prompt';
 }
 
 export interface ChatMessageProps extends Message {
@@ -65,6 +66,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
   role,
   content,
   createdAt,
+  type = 'prompt',
   showTimeStamp = false,
   animation = 'scale',
   actions,
@@ -79,24 +81,50 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
 
   return (
     <div className={cn('flex flex-col', isUser ? 'items-end' : 'items-start')}>
-      <div className={cn(chatBubbleVariants({ isUser, animation }), className)}>
-        <div>
-          <MarkdownRenderer>{content}</MarkdownRenderer>
-        </div>
-
-        {role === 'assistant' && actions ? (
-          <div className='absolute -bottom-4 right-2 flex space-x-1 rounded-lg border bg-background p-1 text-foreground opacity-0 transition-opacity group-hover/message:opacity-100'>
-            {actions}
+      {type === 'prompt' && (
+        <div
+          className={cn(chatBubbleVariants({ isUser, animation }), className)}
+        >
+          <div>
+            <MarkdownRenderer>{content}</MarkdownRenderer>{' '}
           </div>
-        ) : null}
-      </div>
+          {role === 'assistant' && actions ? (
+            <div className='absolute -bottom-4 right-2 flex space-x-1 rounded-lg border bg-background p-1 text-foreground opacity-0 transition-opacity group-hover/message:opacity-100'>
+              {actions}
+            </div>
+          ) : null}
+        </div>
+      )}
+      {type === 'summary' && (
+        <div
+          className={cn(
+            chatBubbleVariants({ isUser, animation }),
+            className,
+            'bg-slate-300 ml-4'
+          )}
+        >
+          <p className='opacity-40 font-bold'>Summary</p>
+          <MarkdownRenderer>{content}</MarkdownRenderer>
+          {role === 'assistant' && actions ? (
+            <div className='absolute -bottom-4 right-2 flex space-x-1 rounded-lg border bg-background p-1 text-foreground opacity-0 transition-opacity group-hover/message:opacity-100'>
+              {actions}
+            </div>
+          ) : null}
+        </div>
+      )}
+      {type === 'translate' && (
+        <div>
+          <MarkdownRenderer>{content}</MarkdownRenderer>{' '}
+        </div>
+      )}
 
       {showTimeStamp && createdAt ? (
         <time
           dateTime={createdAt.toISOString()}
           className={cn(
             'mt-1 block px-1 text-xs opacity-50',
-            animation !== 'none' && 'duration-500 animate-in fade-in-0'
+            animation !== 'none' && 'duration-500 animate-in fade-in-0',
+            type === 'summary' && 'ml-4'
           )}
         >
           {formattedTime}

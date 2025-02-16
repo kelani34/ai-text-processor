@@ -1,5 +1,6 @@
 import type { Message } from '@/components/ui/chat-message';
 import { useState } from 'react';
+import { toast } from 'sonner';
 import { v4 as uuidv4 } from 'uuid';
 
 export interface UseChatOptions {
@@ -9,7 +10,6 @@ export interface UseChatOptions {
 
 export const useChat = ({ initialMessages = [] }: UseChatOptions) => {
   const [messages, setMessages] = useState<Message[]>(initialMessages);
-  const [summaryInput, setSummaryInput] = useState<Message[]>(initialMessages);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
@@ -19,6 +19,7 @@ export const useChat = ({ initialMessages = [] }: UseChatOptions) => {
       role: message.role,
       content: message.content,
       createdAt: new Date(),
+      type: message.type,
     };
 
     if (newMessage.role === 'user') {
@@ -46,6 +47,7 @@ export const useChat = ({ initialMessages = [] }: UseChatOptions) => {
       role: 'user',
       content: input,
       createdAt: new Date(),
+      type: 'prompt',
     };
     append(userMessage);
     setInput('');
@@ -61,6 +63,7 @@ export const useChat = ({ initialMessages = [] }: UseChatOptions) => {
         role: 'assistant',
         content: result,
         createdAt: new Date(),
+        type: 'prompt',
       });
     } catch (error) {
       console.error('Error fetching chat response:', error);
@@ -69,22 +72,44 @@ export const useChat = ({ initialMessages = [] }: UseChatOptions) => {
     }
   };
   const handleSummary = async (summaryInput: Message) => {
-    setInput('');
     setIsLoading(true);
 
     try {
-      const summarizer = await window.ai.summarize.create({ type: 'tl;dr' });
+      const options = {
+        sharedContext: 'This is a scientific article',
+        type: 'key-points',
+        format: 'markdown',
+        length: 'medium',
+      };
 
-      const result = await summarizer.summarize(summaryInput.content);
+      const available = (await self.ai.summarizer.capabilities()).available;
+      // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+      let summarizer: any;
+      if (available === 'no') {
+        toast.error('Summarizer API is not available');
+        return;
+      }
+      if (available === 'readily') {
+        summarizer = await self.ai.summarizer.create(options);
+        const result = await summarizer.summarize(summaryInput.content);
+        append({
+          id: uuidv4(),
+          role: 'assistant',
+          content: result,
+          createdAt: new Date(),
+          type: 'summary',
+        });
+      } else {
+        summarizer = await self.ai.summarizer.create(options);
 
-      console.log(result);
-
-      //   append({
-      //     id: summaryInput.id,
-      //     role: 'assistant',
-      //     content: result,
-      //     createdAt: new Date(),
-      //   });
+        summarizer.addEventListener(
+          'downloadprogress',
+          (e: { loaded: string; total: number }) => {
+            toast.success(`${e.loaded}, ${e.total}`);
+          }
+        );
+        await summarizer.ready;
+      }
     } catch (error) {
       console.error('Error fetching chat response:', error);
     } finally {

@@ -64,11 +64,17 @@ export function Chat({
             content={message.content}
             copyMessage='Copied response to clipboard!'
           />
-          <SummaryButton input={message} handleSummary={handleSummary} />
+          {message.type === 'prompt' && (
+            <SummaryButton
+              input={message}
+              isSummarizing={isGenerating}
+              handleSummary={handleSummary}
+            />
+          )}
         </div>
       ),
     }),
-    [handleSummary]
+    [handleSummary, isGenerating]
   );
 
   return (
@@ -85,7 +91,7 @@ export function Chat({
         <ChatMessages messages={messages}>
           <MessageList
             messages={messages}
-            isTyping={isTyping}
+            isTyping={isGenerating}
             messageOptions={messageOptions}
           />
         </ChatMessages>
