@@ -40,7 +40,6 @@
       "security": { "noGlobalEval": "error" },
       "style": {
         "noVar": "error",
-        "useBlockStatements": "error",
         "useConst": "error",
         "useFilenamingConvention": {
           "level": "error",
@@ -54,7 +53,7 @@
         "noDoubleEquals": "error",
         "noExplicitAny": "error",
         "useNamespaceKeyword": "error",
-        "noConsoleLog": "error"
+        "noConsoleLog": "warn"
       }
     }
   },

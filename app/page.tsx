@@ -1,25 +1,39 @@
 'use client';
 
-import { useEffect } from 'react';
 
-export default function Home() {
-  useEffect(() => {
-    (async () => {
-      const session = await window.ai.languageModel.create();
+import { Chat } from '@/components/ui/chat';
+import { useChat } from '@/hooks/useChat';
 
-      // Prompt the model and wait for the whole result to come back.
-      const result = await session.prompt('Write me a poem.');
-      console.log(result);
+export default function HomePage() {
+  const {
+    messages,
+    input,
+    handleInputChange,
+    handleSubmit,
+    handleSummary,
+    append,
+    stop,
+    isLoading,
+  } = useChat({ initialMessages: [], stream: true });
 
-      // Prompt the model and stream the result:
-      const stream = await session.promptStreaming(
-        'Write me an extra-long poem.'
-      );
-      for await (const chunk of stream) {
-        console.log(chunk);
-      }
-    })();
-  }, []);
-
-  return <main></main>;
+  return (
+    <div className='flex items-center justify-center py-6 h-full container  w-full'>
+      <Chat
+        className='grow h-full'
+        messages={messages}
+        handleSubmit={handleSubmit}
+        handleSummary={handleSummary}
+        input={input}
+        handleInputChange={handleInputChange}
+        isGenerating={isLoading}
+        stop={stop}
+        append={append}
+        suggestions={[
+          'Generate a tasty vegan lasagna recipe for 3 people.',
+          'Generate a list of 5 questions for a job interview for a software engineer.',
+          'Who won the 2022 FIFA World Cup?',
+        ]}
+      />
+    </div>
+  );
 }
