@@ -1,6 +1,6 @@
 'use client';
 
-import { forwardRef, useCallback, useState, type ReactElement } from 'react';
+import { forwardRef, useCallback } from 'react';
 import { ArrowDown } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
@@ -14,10 +14,7 @@ import { MessageList } from '@/components/ui/message-list';
 import { PromptSuggestions } from '@/components/ui/prompt-suggestions';
 
 interface ChatPropsBase {
-  handleSubmit: (
-    event?: { preventDefault?: () => void }
-    // options?: { experimental_attachments?: FileList }
-  ) => void;
+  handleSubmit: (event?: { preventDefault?: () => void }) => void;
   handleSummary: (summaryInput: Message) => void;
   messages: Array<Message>;
   input: string;
@@ -99,17 +96,12 @@ export function Chat({
         isPending={isGenerating || isTyping}
         handleSubmit={handleSubmit}
       >
-        {({ files, setFiles }) => (
-          <MessageInput
-            value={input}
-            onChange={handleInputChange}
-            allowAttachments
-            files={files}
-            setFiles={setFiles}
-            stop={stop}
-            isGenerating={isGenerating}
-          />
-        )}
+        <MessageInput
+          value={input}
+          onChange={handleInputChange}
+          stop={stop}
+          isGenerating={isGenerating}
+        />
       </ChatForm>
     </ChatContainer>
   );
@@ -177,10 +169,7 @@ interface ChatFormProps {
   className?: string;
   isPending: boolean;
   handleSubmit: (event?: { preventDefault?: () => void }) => void;
-  children: (props: {
-    files: File[] | null;
-    setFiles: React.Dispatch<React.SetStateAction<File[] | null>>;
-  }) => ReactElement;
+  children: React.ReactNode;
 }
 
 export const ChatForm = forwardRef<HTMLFormElement, ChatFormProps>(
@@ -193,15 +182,13 @@ export const ChatForm = forwardRef<HTMLFormElement, ChatFormProps>(
     },
     ref
   ) => {
-    const [files, setFiles] = useState<File[] | null>(null);
-
     const onSubmit = (event: React.FormEvent) => {
       handleSubmit(event);
     };
 
     return (
       <form ref={ref} onSubmit={onSubmit} className={className}>
-        {children({ files, setFiles })}
+        {children}
       </form>
     );
   }

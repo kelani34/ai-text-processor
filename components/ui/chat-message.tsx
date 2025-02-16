@@ -1,12 +1,8 @@
 'use client';
 
 import type React from 'react';
-// import { useMemo } from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
-// import { Code2, Loader2, Terminal } from 'lucide-react';
-
 import { cn } from '@/lib/utils';
-// import { FilePreview } from '@/components/ui/file-preview';
 import { MarkdownRenderer } from '@/components/ui/markdown-renderer';
 
 const chatBubbleVariants = cva(
@@ -51,37 +47,11 @@ const chatBubbleVariants = cva(
 
 type Animation = VariantProps<typeof chatBubbleVariants>['animation'];
 
-// interface Attachment {
-//   name?: string;
-//   contentType?: string;
-//   url: string;
-// }
-
-// interface PartialToolCall {
-//   state: 'partial-call';
-//   toolName: string;
-// }
-
-// interface ToolCall {
-//   state: 'call';
-//   toolName: string;
-// }
-
-// interface ToolResult {
-//   state: 'result';
-//   toolName: string;
-//   result: any;
-// }
-
-// type ToolInvocation = PartialToolCall | ToolCall | ToolResult;
-
 export interface Message {
   id: string;
   role: 'user' | 'assistant' | (string & {});
   content: string;
   createdAt?: Date;
-  // experimental_attachments?: Attachment[];
-  // toolInvocations?: ToolInvocation[];
 }
 
 export interface ChatMessageProps extends Message {
@@ -99,21 +69,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
   animation = 'scale',
   actions,
   className,
-  // experimental_attachments,
-  // toolInvocations,
 }) => {
-  // const files = useMemo(() => {
-  //   return experimental_attachments?.map((attachment) => {
-  //     const dataArray = dataUrlToUint8Array(attachment.url);
-  //     const file = new File([dataArray], attachment.name ?? 'Unknown');
-  //     return file;
-  //   });
-  // }, [experimental_attachments]);
-
-  // if (toolInvocations && toolInvocations.length > 0) {
-  //   return <ToolCall toolInvocations={toolInvocations} />;
-  // }
-
   const isUser = role === 'user';
 
   const formattedTime = createdAt?.toLocaleTimeString('en-US', {
@@ -123,14 +79,6 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
 
   return (
     <div className={cn('flex flex-col', isUser ? 'items-end' : 'items-start')}>
-      {/* {files ? (
-        <div className='mb-1 flex flex-wrap gap-2'>
-          {files.map((file) => {
-            return <FilePreview file={file} key={Math.random()} />;
-          })}
-        </div>
-      ) : null} */}
-
       <div className={cn(chatBubbleVariants({ isUser, animation }), className)}>
         <div>
           <MarkdownRenderer>{content}</MarkdownRenderer>
@@ -157,51 +105,3 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
     </div>
   );
 };
-
-// function dataUrlToUint8Array(data: string) {
-//   const base64 = data.split(',')[1];
-//   const buf = Buffer.from(base64, 'base64');
-//   return new Uint8Array(buf);
-// }
-
-// function ToolCall({
-//   toolInvocations,
-// }: Pick<ChatMessageProps, 'toolInvocations'>) {
-//   if (!toolInvocations?.length) return null;
-
-//   return (
-//     <div className='flex flex-col items-start gap-2'>
-//       {toolInvocations.map((invocation) => {
-//         switch (invocation.state) {
-//           case 'partial-call':
-//           case 'call':
-//             return (
-//               <div
-//                 key={Math.random()}
-//                 className='flex items-center gap-2 rounded-lg border bg-muted px-3 py-2 text-sm text-muted-foreground'
-//               >
-//                 <Terminal className='h-4 w-4' />
-//                 <span>Calling {invocation.toolName}...</span>
-//                 <Loader2 className='h-3 w-3 animate-spin' />
-//               </div>
-//             );
-//           case 'result':
-//             return (
-//               <div
-//                 key={Math.random()}
-//                 className='flex flex-col gap-1.5 rounded-lg border bg-muted px-3 py-2 text-sm'
-//               >
-//                 <div className='flex items-center gap-2 text-muted-foreground'>
-//                   <Code2 className='h-4 w-4' />
-//                   <span>Result from {invocation.toolName}</span>
-//                 </div>
-//                 <pre className='overflow-x-auto whitespace-pre-wrap text-foreground'>
-//                   {JSON.stringify(invocation.result, null, 2)}
-//                 </pre>
-//               </div>
-//             );
-//         }
-//       })}
-//     </div>
-//   );
-// }
